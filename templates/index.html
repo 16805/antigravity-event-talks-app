@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Hub & Twitter Share</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- App Container -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-wrapper">
+                    <i class="fa-solid fa-database logo-icon"></i>
+                </div>
+                <div class="brand">
+                    <h1>BigQuery Release Hub</h1>
+                    <p class="subtitle">Stay updated with Google Cloud BigQuery developments</p>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="sync-status" id="syncStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Checking feed...</span>
+                </div>
+                <button class="btn btn-refresh" id="refreshBtn" title="Refresh Release Notes">
+                    <i class="fa-solid fa-arrows-rotate refresh-icon" id="refreshIcon"></i>
+                    <span>Refresh</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Body -->
+        <main class="app-main">
+            
+            <!-- Left Pane: Release Notes List & Filters -->
+            <section class="pane feed-pane">
+                <!-- Search and Filters Bar -->
+                <div class="control-panel">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="searchInput" placeholder="Search updates (e.g. Gemini, external tables)...">
+                        <button id="clearSearchBtn" class="btn-clear-search" style="display: none;">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="filters-container">
+                        <span class="filter-label">Filter:</span>
+                        <div class="filter-chips">
+                            <button class="chip active" data-type="all">All</button>
+                            <button class="chip" data-type="feature"><i class="fa-solid fa-star"></i> Features</button>
+                            <button class="chip" data-type="announcement"><i class="fa-solid fa-bullhorn"></i> Announcements</button>
+                            <button class="chip" data-type="deprecation"><i class="fa-solid fa-triangle-exclamation"></i> Deprecations</button>
+                            <button class="chip" data-type="other">Others</button>
+                        </div>
+                    </div>
+                    
+                    <div class="results-meta">
+                        <span id="resultsCount">Showing 0 updates</span>
+                    </div>
+                </div>
+
+                <!-- Feed Container -->
+                <div class="feed-container" id="feedContainer">
+                    <!-- Shimmer Loading Placeholder -->
+                    <div class="shimmer-container" id="shimmerLoader">
+                        <div class="shimmer-card"></div>
+                        <div class="shimmer-card"></div>
+                        <div class="shimmer-card"></div>
+                    </div>
+                    <!-- Actual Feed List -->
+                    <div class="feed-list" id="feedList" style="display: none;"></div>
+                </div>
+            </section>
+            
+            <!-- Right Pane: Details & Twitter Composer -->
+            <section class="pane composer-pane">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-feather-pointed"></i> Share Workspace</h2>
+                </div>
+                
+                <div class="composer-container" id="composerContainer">
+                    <!-- Empty State -->
+                    <div class="empty-state" id="composerEmptyState">
+                        <div class="empty-icon-wrapper">
+                            <i class="fa-solid fa-paper-plane animate-float"></i>
+                        </div>
+                        <h3>No Update Selected</h3>
+                        <p>Select any specific feature, announcement, or update from the list on the left to read details, copy content, or compose a Tweet.</p>
+                    </div>
+
+                    <!-- Active Composer Panel -->
+                    <div class="active-composer" id="composerActivePanel" style="display: none;">
+                        
+                        <!-- Section 1: Selected Update Detail Card -->
+                        <div class="details-section">
+                            <div class="details-meta-header">
+                                <span class="update-type-badge" id="selectedBadge">Feature</span>
+                                <span class="update-date" id="selectedDate"><i class="fa-regular fa-calendar"></i> June 17, 2026</span>
+                            </div>
+                            
+                            <div class="details-content-box">
+                                <div class="details-html" id="selectedHtml">
+                                    <!-- Dynamic HTML content goes here -->
+                                </div>
+                            </div>
+                            
+                            <div class="details-actions">
+                                <a id="selectedOriginalLink" href="#" target="_blank" class="btn btn-outline btn-sm">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Original Release Page
+                                </a>
+                                <button id="copyRawBtn" class="btn btn-outline btn-sm">
+                                    <i class="fa-regular fa-copy"></i> Copy Text
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Simulated Twitter Composer -->
+                        <div class="twitter-composer-card">
+                            <div class="composer-header">
+                                <div class="twitter-user-avatar">
+                                    <i class="fa-brands fa-x-twitter"></i>
+                                </div>
+                                <div class="twitter-header-info">
+                                    <span class="user-name">Share Draft</span>
+                                    <span class="user-handle">@ready_to_tweet</span>
+                                </div>
+                            </div>
+                            
+                            <div class="composer-body">
+                                <textarea id="tweetTextArea" rows="6" placeholder="What's happening?"></textarea>
+                            </div>
+                            
+                            <div class="composer-footer">
+                                <div class="composer-stats">
+                                    <!-- Progress Circle for character limit -->
+                                    <div class="progress-ring-container">
+                                        <svg class="progress-ring" width="30" height="30">
+                                            <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.1)" stroke-width="2.5" fill="transparent" r="11" cx="15" cy="15"/>
+                                            <circle class="progress-ring-circle" id="charProgressRing" stroke="#1d9bf0" stroke-width="2.5" fill="transparent" r="11" cx="15" cy="15"/>
+                                        </svg>
+                                        <span class="char-count" id="charCount">280</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="composer-actions">
+                                    <button class="btn btn-tweet" id="tweetBtn">
+                                        <i class="fa-brands fa-x-twitter"></i>
+                                        <span>Tweet Draft</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle toast-icon"></i>
+        <span class="toast-message">Success!</span>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
