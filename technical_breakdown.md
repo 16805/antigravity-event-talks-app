@@ -67,21 +67,21 @@ Here is how the system handles a request when the user clicks the **Refresh** bu
 sequenceDiagram
     autonumber
     actor User
-    participant Browser as Browser UI
-    participant JS as app.js (JS Engine)
-    participant Flask as app.py (Flask Server)
-    participant Feed as Google Cloud (Feed XML)
+    participant Browser as "Browser UI"
+    participant JS as "app.js (JS Engine)"
+    participant Flask as "app.py (Flask Server)"
+    participant Feed as "Google Cloud (Feed XML)"
 
     User->>Browser: Clicks "Refresh" Button
     Browser->>JS: Trigger click event listener
-    Note over JS: Update UI to "Syncing..." state<br/>Start spinner & show shimmer cards
+    Note over JS: Update UI to "Syncing..." state\nStart spinner & show shimmer cards
     JS->>Flask: GET /api/release-notes?refresh=true
     
     rect rgb(20, 30, 48)
         Note over Flask: refresh=true bypasses local cache
-        Flask->>Feed: GET docs.cloud.google.com/...xml
+        Flask->>Feed: GET docs.cloud.google.com/feeds/...xml
         Feed-->>Flask: Return Raw XML Feed
-        Flask->>Flask: Parse XML to JSON (Atom feed schema)
+        Flask->>Flask: Parse XML to JSON
         Flask->>Flask: Update local in-memory cache & timestamp
     end
     
@@ -89,9 +89,9 @@ sequenceDiagram
     
     rect rgb(20, 45, 30)
         Note over JS: Hide shimmer cards & stop spinner
-        JS->>JS: DOMParser splits daily entries by <h3>
+        JS->>JS: DOMParser splits daily entries by h3
         JS->>JS: Render divided cards grouped by Date
-        JS->>Browser: Update UI lists & set status: "Synced [Time]"
+        JS->>Browser: Update UI lists & set status: "Synced (Time)"
     end
     
     Browser-->>User: Visual update list ready to select/tweet
